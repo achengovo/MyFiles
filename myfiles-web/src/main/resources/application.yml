@@ -1,0 +1,10 @@
+server:
+  port: 8080
+spring:
+  servlet:
+    multipart:
+      enabled: true #启用文件上传
+      max-file-size: 10240MB #上传文件的最大大小
+      max-request-size: 10240MB #上传文件的最大总大小
+      file-size-threshold: 5MB #文件上传的阀值
+      location: /tmp/ #文件上传的临时目录

@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+}
+/* .my-el-breadcrumb{
+  /* background-color: #e9eef3; */
+/* height: "";
+
+} */
+.my-el-container {
+    height: 100vh;
+}
+.el-header,
+.el-footer {
+    background-color: white;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+}
+
+.el-aside {
+    background-color: #d3dce6;
+    color: #333;
+    text-align: center;
+    /* line-height: 200px; */
+}
+
+.el-main {
+    background-color: #e9eef3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+}
+
+body > .el-container {
+    margin-bottom: 40px;
+}
+
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+}
+
+.el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+}
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    min-height: 400px;
+    height: 100%;
+}
+.el-menu--collapse {
+    height: 100%;
+}
+.el-table tr {
+    /* background-color: #FFF; */
+    /* max-height: 60px; */
+    line-height: 20px;
+}
+.my-el-message-box{
+    width: 80%;
+    /* height: 82%; */
+    padding-bottom: 0;
+    max-width: 142vh;
+}
+.my-hover-button{
+    border: 0;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    /* text-align: center; */
+    line-height: 25px;
+}
+.my-hover-button:hover{
+    border: 0;
+    background-color: white;
+    color: black;
+}
+.my-hover-button:focus{
+    border: 0;
+    background-color: white;
+    color: black;
+}
+.el-table__row{
+    cursor: pointer;
+}
+.my-search-input>input{
+    border-radius: 30px;
+}
+.el-breadcrumb__inner{
+    cursor: pointer;
+}
+.el-breadcrumb__inner:hover{
+    color: #3a8ee6;
+}
+.show{
+    display: none;
+}

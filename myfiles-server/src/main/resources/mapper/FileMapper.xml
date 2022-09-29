@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.achengovo.myfiles.mapper.FileMapper">
+    <!--获取对应目录文件-->
+    <select id="getFileByDir" parameterType="userFile" resultType="userFile">
+        select userFileId, userFileName, userFileSaveTime, fileType, dir, userFileSize,fileLocation
+        from userfiles
+        where userId = #{userId}
+          and dir = #{dir}
+          and userFileState = '正常'
+    </select>
+    <!--删除文件,修改文件状态为删除-->
+    <update id="delFileById" parameterType="userFile">
+        update userfiles set userFileState='删除' where userFileId=#{userFileId} and userId=#{userId}
+    </update>
+    <!--根据id获取文件信息-->
+    <select id="getFileByUserFileId" parameterType="userFile" resultType="userFile">
+        select *
+        from userfiles
+        where userId = #{userId}
+          and userFileId = #{userFileId}
+          and userFileState = '正常'
+    </select>
+    <!--重命名-->
+    <update id="reName" parameterType="userFile">
+        update userfiles set userFileName=#{userFileName} where userFileId=#{userFileId} and userId=#{userId} and userFileState='正常'
+    </update>
+    <!--移动文件-->
+    <update id="moveFile" parameterType="userFile">
+        update userfiles set dir=#{dir} where userFileId=#{userFileId} and userId=#{userId} and userFileState='正常'
+    </update>
+    <!--向userfiles表中添加记录-->
+    <insert id="insertToUserFiles" parameterType="userFile">
+        insert into userfiles(userId, userFileName, userFileSaveTime, userFileState, fileType, fileLocation, dir,
+                              userFileSize)
+        VALUES (#{userId}, #{userFileName}, now(), '正常', #{fileType}, #{fileLocation}, #{dir}, #{userFileSize})
+    </insert>
+    <!--新建文件夹-->
+    <insert id="newDir" parameterType="userFile">
+        insert into userfiles(userId, userFileName, userFileSaveTime, userFileState, fileType, dir)
+        VALUES (#{userId}, #{userFileName}, now(), '正常', 'dir', #{dir})
+    </insert>
+</mapper>

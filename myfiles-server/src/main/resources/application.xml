@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context-4.1.xsd">
+    <!--读取db.properties -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--配置数据源-->
+    <bean id="dataSource"
+          class="com.alibaba.druid.pool.DruidDataSource">
+        <!--数据库驱动-->
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <!--连接数据库的url-->
+        <property name="url" value="${jdbc.url}"/>
+        <!--连接数据库的用户名-->
+        <property name="username" value="${jdbc.username}"/>
+        <!--连接数据库的密码-->
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--配置MyBatis的工厂-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--配置MyBatis的核心配置文件所在位置-->
+        <property name="configLocation" value="classpath:mybatis.xml"/>
+        <!--映射文件位置-->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+        <!--实体类别名-->
+        <property name="typeAliasesPackage" value="com.achengovo.myfiles.entity"/>
+    </bean>
+    <!--接口开发，扫描mapper包，写在此包下的接口即可被扫描到-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.achengovo.myfiles.mapper"/>
+    </bean>
+    <!--配置扫描@service注解-->
+    <context:component-scan base-package="com.achengovo.myfiles.serviceImpl"/>
+</beans>

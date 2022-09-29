@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.achengovo.myfiles.mapper.UserMapper">
+    <!--用户登录-->
+    <select id="login" parameterType="user" resultType="user">
+        select userId,userName,userAvatar,userEmail,userSex
+        from user
+        where userName = #{userName}
+          and userPass = #{userPass}
+    </select>
+    <!--查询用户是否存在-->
+    <select id="hasUser" parameterType="user" resultType="Integer">
+        select count(*)
+        from user
+        where userName = #{userName}
+    </select>
+    <!--用户注册-->
+    <insert id="register" parameterType="user">
+        insert into user(userName, userPass, userEmail,userAvatar)
+        values (#{userName}, #{userPass}, #{userEmail},'default.png')
+    </insert>
+    <!--修改头像-->
+    <update id="uploadAvatar" parameterType="user">
+        update user set userAvatar=#{userAvatar} where userId=#{userId}
+    </update>
+    <!--获取用户信息-->
+    <select id="getUserInfo" parameterType="user" resultType="user">
+        select * from user where userId=#{userId}
+    </select>
+    <!--修改用户信息-->
+    <update id="changeUser" parameterType="user">
+        update user
+        set userName=#{userName},userEmail=#{userEmail},userSex=#{userSex}
+        where userId=#{userId}
+    </update>
+    <!--根据ID修改密码-->
+    <update id="changePassById" parameterType="user">
+        update user set userPass=#{userPass} where userId=#{userId}
+    </update>
+    <!--根据ID和密码修改密码-->
+    <update id="changePassByPass">
+        update user set userPass=#{newPass} where userId=#{userId} and userPass=#{userPass}
+    </update>
+    <!--根据用户名获取用户信息-->
+    <select id="getUserByUserName" parameterType="user" resultType="user">
+        select * from user where userName=#{userName}
+    </select>
+    <!--根据用户名修改密码-->
+    <update id="updatePassByUserName" parameterType="user">
+        update user set userPass=#{userPass} where userName=#{userName}
+    </update>
+</mapper>

@@ -1,0 +1,865 @@
+<!--
+ * @Descripttion: 
+ * @Author: 阿成
+ * @Date: 2022-01-20 23:33:01
+ * @LastEditTime: 2022-01-22 19:21:45
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>五子棋</title>
+  <link rel="shortcut icon" href="./static/images/logo.png">
+  <link rel="bookmark" href="./static/images/logo.png">
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    background-color: #E9EEF3;
+    text-align: center;
+  }
+
+  .oneItem {
+    background-color: black;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+  }
+
+  .tableOne {
+    width: 100%;
+    max-width: 80vh;
+    max-height: 100%;
+  }
+
+  .top {
+    width: 100%;
+    max-width: 80vh;
+    text-align: center;
+    margin: 0 auto;
+    height: 50px;
+  }
+
+  .topleft {
+    float: left;
+    width: 33%;
+  }
+
+  .topcenter {
+    float: left;
+    width: 33%;
+  }
+
+  .topright {
+    width: 33%;
+    float: right;
+  }
+  .bottom {
+    width: 100%;
+    max-width: 80vh;
+    text-align: center;
+    margin: 0 auto;
+    height: 50px;
+  }
+  .bottom_left {
+    float: left;
+    width: 33%;
+  }
+  .bottom_right{
+    float: right;
+    width: 33%;
+  }
+  #return {
+    background-color: aqua;
+    padding: 4px;
+    border: 0;
+    width: 100px;
+    border-radius: 50px;
+  }
+  #saveImg {
+    background-color: aqua;
+    padding: 4px;
+    border: 0;
+    width: 100px;
+    border-radius: 50px;
+  }
+  #regame {
+    background-color: aqua;
+    padding: 4px;
+    border: 0;
+    width: 100px;
+    border-radius: 50px;
+  }
+
+</style>
+<body>
+  <div class="top">
+    <div class="topleft">
+      <div>白棋</div>
+      <div id="time_white"></div>
+    </div>
+    <div class="topcenter">
+      <div id='PK'>PK</div>
+      <div><button id='regame' onclick="init()">重新开始</button></div>
+    </div>
+    <div class="topright">
+      <div>黑棋</div>
+      <div id="time_black"></div>
+    </div>
+  </div>
+  </div>
+  <div class="moddle">
+    <canvas onclick="clickCanvas(event)" onmousemove="mouseMove(event)" width="900" height="900" id="tableOne"
+      class="tableOne"></canvas>
+  </div>
+  <div class="bottom">
+    <div class="bottom_left">
+      <div>
+        <button id="saveImg" onclick="convertCanvasToImage()">保存对局</button>
+      </div>
+    </div>
+    <div class="bottom_right">
+      <div>
+        <button id="return" onclick="window.location.href='file'">返回首页</button>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  /*
+ * @Descripttion:
+ * @Author: 阿成
+ * @Date: 2022-01-22 17:38:48
+ * @LastEditTime: 2022-01-24 16:29:22
+ */
+  /**
+   * @name: 监听鼠标移动
+   * @param {*} e
+   * @return {*}
+   */
+  function mouseMove(e) {
+    if (gaming) {
+      x = calcX(e.clientX) //获取x坐标：1-15
+      y = calcY(e.clientY) //获取y坐标：1-15
+      if (this.data[x][y] == 0) {
+        drowBox(x, y)//画预选框
+      }
+    }
+  }
+  /**
+   * @name: 擦除上一个预选框
+   * @param {*} x
+   * @param {*} y
+   * @return {*}
+   */
+  function clearBox() {
+    x = this.now[0]
+    y = this.now[1]
+    if (this.data[x][y] == 0) {
+      var c = document.getElementById('tableOne')
+      var cxt = c.getContext('2d')
+      cxt.fillStyle = 'orange'
+      cxt.fillRect(60 * x - 54, 60 * y - 21, 15, 15)
+      cxt.fillRect(60 * x - 21, 60 * y - 21, 15, 15)
+      cxt.fillRect(60 * x - 21, 60 * y - 54, 15, 15)
+      cxt.fillRect(60 * x - 54, 60 * y - 54, 15, 15)
+    }
+  }
+  /**
+   * @name: 画预选框
+   * @param {*}
+   * @return {*}
+   */
+  function drowBox(x, y) {
+    if (this.now[0] != x || this.now[1] != y) {
+      clearBox()//擦除上一个预选框
+      this.now = [x, y]
+      var c = document.getElementById('tableOne')
+      var cxt = c.getContext('2d')
+      cxt.beginPath()
+      cxt.strokeStyle = this.color
+      cxt.lineWidth = 4
+      cxt.moveTo(60 * x - 30, 60 * y - 30)
+      cxt.moveTo(60 * x - 51, 60 * y - 21)
+      cxt.lineTo(60 * x - 51, 60 * y - 9)
+      cxt.lineTo(60 * x - 39, 60 * y - 9)
+      cxt.moveTo(60 * x - 21, 60 * y - 9)
+      cxt.lineTo(60 * x - 9, 60 * y - 9)
+      cxt.lineTo(60 * x - 9, 60 * y - 21)
+      cxt.moveTo(60 * x - 9, 60 * y - 39)
+      cxt.lineTo(60 * x - 9, 60 * y - 51)
+      cxt.lineTo(60 * x - 21, 60 * y - 51)
+      cxt.moveTo(60 * x - 39, 60 * y - 51)
+      cxt.lineTo(60 * x - 51, 60 * y - 51)
+      cxt.lineTo(60 * x - 51, 60 * y - 39)
+      cxt.stroke()
+    }
+  }
+  /**
+   * @name: 计算X
+   * @param {*} X
+   * @return {*} 计算后的值
+   */
+  function calcX(X) {
+    var div = document.getElementById('tableOne')
+    var w = div.offsetWidth / 900
+    X = X - div.offsetLeft
+    return Math.ceil(X / 60 / w)
+  }
+  /**
+   * @name: 计算Y
+   * @param {*} Y
+   * @return {*} 计算后的值
+   */
+  function calcY(Y) {
+    var div = document.getElementById('tableOne')
+    var w = div.offsetWidth / 900
+    Y = Y - div.offsetTop
+    var div2 = document.getElementById('xycoordinates')
+    return Math.ceil(Y / 60 / w)
+  }
+  /**
+   * @name: 画棋盘
+   * @msg: 画棋盘
+   */
+  function drowTable() {
+    var c = document.getElementById('tableOne')
+    var cxt = c.getContext('2d')
+    cxt.lineWidth = 2
+    cxt.beginPath()
+    cxt.fillStyle = 'orange'
+    // cxt.clearRect(0, 0, 900, 900)//清空画布
+    cxt.fillRect(0, 0, 900, 900)//清空画布
+    cxt.strokeStyle = 'black'
+    //画棋盘
+    for (var i = 0; i < 15; i++) {
+      cxt.beginPath()
+      if(i==7){
+        cxt.lineWidth = 4
+      }else{
+        cxt.lineWidth = 2
+      }
+      cxt.moveTo(30 + 60 * i, 30)
+      cxt.lineTo(30 + 60 * i, 870)
+      cxt.stroke()
+    }
+    for (var i = 0; i < 15; i++) {
+      cxt.beginPath()
+      if(i==7){
+        cxt.lineWidth = 4
+      }else{
+        cxt.lineWidth = 2
+      }
+      cxt.moveTo(30, 30 + 60 * i)
+      cxt.lineTo(870, 30 + 60 * i)
+      cxt.stroke()
+    }
+    //画棋盘上的五个点
+    cxt.beginPath()
+    cxt.fillStyle = 'black'
+    cxt.arc(60 * 8 - 30, 60 * 8 - 30, 7, Math.PI * 2, 0, true)
+    cxt.fill()
+    cxt.beginPath()
+    cxt.arc(60 * 4 - 30, 60 * 4 - 30, 7, Math.PI * 2, 0, true)
+    cxt.fill()
+    cxt.beginPath()
+    cxt.arc(60 * 12 - 30, 60 * 4 - 30, 7, Math.PI * 2, 0, true)
+    cxt.fill()
+    cxt.beginPath()
+    cxt.arc(60 * 4 - 30, 60 * 12 - 30, 7, Math.PI * 2, 0, true)
+    cxt.fill()
+    cxt.beginPath()
+    cxt.arc(60 * 12 - 30, 60 * 12 - 30, 7, Math.PI * 2, 0, true)
+    cxt.fill()
+  }
+  /**
+   * @name: 画棋子
+   * @param {*} x 棋子x
+   * @param {*} y 棋子y
+   * @param {*} color 棋子颜色
+   */
+
+  function drawChess(x, y) {
+    clearBox()//擦除预选框
+    var c = document.getElementById('tableOne')
+    var cxt = c.getContext('2d')
+    cxt.beginPath()
+    cxt.fillStyle = this.color
+    cxt.strokeStyle = this.color
+    cxt.arc(60 * x - 30, 60 * y - 30, 21, Math.PI * 2, 0, true)
+    cxt.stroke()
+    cxt.fill()
+    //
+    if (color == 'black') {
+      this.data[x][y] = 1
+      this.color = 'white'
+    } else {
+      this.data[x][y] = -1
+      this.color = 'black'
+    }
+    this.time = 30
+  }
+  /**
+   * @name: 点击画布
+   * @param {*} e
+   * @return {*}
+   */
+  function clickCanvas(e) {
+    if (gaming) {
+      x = calcX(e.clientX) //获取x坐标：1-15
+      y = calcY(e.clientY) //获取y坐标：1-15
+      if (this.data[x][y] == 0) {
+        //判断当前位置是否为0(未下子)
+        drawChess(x, y)//画棋子
+        judge(x, y)//判断是否结束
+      }
+    }
+  }
+  /**
+   * @name: 判断横向是否五子连珠
+   * @param {*} x 落子横坐标
+   * @param {*} y 落子纵坐标
+   */
+  function judgeX(x, y) {
+    num = 1
+    co = this.data[x][y]
+    var fiveCheese = [[x, y], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+    //横向向左x-1
+    for (var i = 1; i < x; i++) {
+      if (this.data[x - i][y] == co) {
+        fiveCheese[num][0] = x - i
+        fiveCheese[num][1] = y
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    //横向向右x+1
+    for (var i = 1; i < 16 - x; i++) {
+      if (this.data[x + i][y] == co) {
+        fiveCheese[num][0] = x + i
+        fiveCheese[num][1] = y
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    if (num >= 5) {
+      drawFiveCheese(fiveCheese)
+      judgeworb(co)
+    }
+  }
+  /**
+   * @name: 判断纵向是否五子连珠
+   * @param {*} x 落子横坐标
+   * @param {*} y 落子纵坐标
+   */
+  function judgeY(x, y) {
+    num = 1
+    co = this.data[x][y]
+    var fiveCheese = [[x, y], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+    //纵向判断
+    //向上y-i
+    for (var i = 1; i < y; i++) {
+      if (this.data[x][y - i] == co) {
+        fiveCheese[num][0] = x
+        fiveCheese[num][1] = y - i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    //向下y+i
+    for (var i = 1; i < 16 - y; i++) {
+      if (this.data[x][y + i] == co) {
+        fiveCheese[num][0] = x
+        fiveCheese[num][1] = y + i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    if (num >= 5) {
+      drawFiveCheese(fiveCheese)
+      judgeworb(co)
+    }
+  }
+  /**
+   * @name: 判断斜向是否五子连珠(左上右下)
+   * @param {*} x 落子横坐标
+   * @param {*} y 落子纵坐标
+   */
+  function judgeXY1(x, y) {
+    //左上
+    num = 1
+    co = this.data[x][y]
+    var fiveCheese = [[x, y], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+    for (var i = 1; i < Math.min(x, y); i++) {
+      if (this.data[x - i][y - i] == co) {
+        fiveCheese[num][0] = x - i
+        fiveCheese[num][1] = y - i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    //右下
+    for (var i = 1; i < Math.min(16 - x, 16 - y); i++) {
+      if (this.data[x + i][y + i] == co) {
+        fiveCheese[num][0] = x + i
+        fiveCheese[num][1] = y + i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    if (num >= 5) {
+      drawFiveCheese(fiveCheese)
+      judgeworb(co)
+    }
+  }
+  /**
+   * @name: 判断斜向是否五子连珠(右上左下)
+   * @param {*} x 落子横坐标
+   * @param {*} y 落子纵坐标
+   */
+  function judgeXY2(x, y) {
+    //右上
+    num = 1
+    co = this.data[x][y]
+    var fiveCheese = [[x, y], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+    for (var i = 1; i < Math.min(16 - x, y); i++) {
+      if (this.data[x + i][y - i] == co) {
+        fiveCheese[num][0] = x + i
+        fiveCheese[num][1] = y - i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    //左下
+    for (var i = 1; i < Math.min(x, 16 - y); i++) {
+      if (this.data[x - i][y + i] == co) {
+        fiveCheese[num][0] = x - i
+        fiveCheese[num][1] = y + i
+        num = num + 1
+      } else {
+        break
+      }
+    }
+    if (num >= 5) {
+      drawFiveCheese(fiveCheese)
+      judgeworb(co)
+    }
+  }
+  /**
+   * @name: 结束游戏
+   * @param {*} co 胜出方(1:黑棋，-1:白棋)
+   * @return {*}
+   */
+  function judgeworb(co) {
+    this.gaming = false
+    clearBox()
+    if (co == 1) {
+      // console.log('黑方胜出')
+      document.getElementById('PK').innerHTML = '黑棋胜出'
+    } else if (co == -1) {
+      // console.log('白方胜出')
+      document.getElementById('PK').innerHTML = '白棋胜出'
+    }
+    // document.getElementById('tableOne').onclick = null
+    // document.getElementById('tableOne').onmousemove = null
+  }
+  /**
+   * @name: 画五子连珠的外框
+   * @param {} Array
+   * @return {*}
+   */
+  function drawFiveCheese(fiveCheese) {
+    var c = document.getElementById('tableOne')
+    var cxt = c.getContext('2d')
+    cxt.strokeStyle = 'red'
+    cxt.lineWidth = 4
+    for (var i = 0; i < fiveCheese.length; i++) {
+      cxt.beginPath()
+      cxt.arc(60 * fiveCheese[i][0] - 30, 60 * fiveCheese[i][1] - 30, 22, Math.PI * 2, 0, true)
+      cxt.stroke()
+    }
+  }
+  /**
+   * @name: 判断是否五子连珠
+   * @param {*} x
+   * @param {*} y
+   * @return {*}
+   */
+  function judge(x, y) {
+    judgeX(x, y)
+    judgeY(x, y)
+    judgeXY1(x, y)
+    judgeXY2(x, y)
+  }
+  /**
+   * @name: 倒计时,每过一秒，time-1,若time=0,结束
+   */
+  var timing = window.setInterval(function () {
+    if (gaming) {
+      if (this.time > 0) {
+        time = time - 1
+      } else if (time == 0) {
+        if (this.color == 'black') {
+          judgeworb(-1)
+        } else {
+          judgeworb(1)
+        }
+      }
+    }
+  }, 1000)
+  /**
+   * @name: 每过0.1秒进行一次时间渲染
+   */
+  var showTime = window.setInterval(function () {
+    if (gaming) {
+      if (this.color == 'black') {
+        document.getElementById('time_white').innerHTML = ''
+        document.getElementById('time_black').innerHTML = this.time
+      } else {
+        document.getElementById('time_black').innerHTML = ''
+        document.getElementById('time_white').innerHTML = this.time
+      }
+    }
+  }, 100)
+  /**
+   * @name: 获取当前时间
+   * @return {*}
+   */
+  function getCurrentDate() {
+    var now = new Date();
+    var year = now.getFullYear(); //得到年份
+    var month = now.getMonth();//得到月份
+    var date = now.getDate();//得到日期
+    var day = now.getDay();//得到周几
+    var hour = now.getHours();//得到小时
+    var minu = now.getMinutes();//得到分钟
+    var sec = now.getSeconds();//得到秒
+    month = month + 1;
+    if (month < 10) month = "0" + month;
+    if (date < 10) date = "0" + date;
+    if (hour < 10) hour = "0" + hour;
+    if (minu < 10) minu = "0" + minu;
+    if (sec < 10) sec = "0" + sec;
+    var time = "";
+    time = year + "-" + month + "-" + date + "_" + hour + "-" + minu + "-" + sec;
+    return time;
+  }
+  /**
+   * @name: 将画布保存为图片
+   * @param {*} canvas
+   * @return {*}
+   */
+  function convertCanvasToImage() {
+    canvas = document.getElementById('tableOne')
+    var image = new Image();
+    image.src = canvas.toDataURL("image/png");
+    var url = image.src;                            // 获取图片地址
+    var a = document.createElement('a');          // 创建一个a节点插入的document
+    var event = new MouseEvent('click')           // 模拟鼠标click点击事件
+    // var name=
+    a.download = getCurrentDate()                  // 设置a节点的download属性值
+    a.href = url;                                 // 将图片的src赋值给a节点的href
+    a.dispatchEvent(event)
+  }
+  /**
+   * @name: 初始化函数，重开函数
+   * @param {*}
+   * @return {*}
+   */
+  function init() {
+    // var c = document.getElementById('tableOne')
+    // var cxt = c.getContext('2d')
+    // cxt.strokeStyle = 'black'
+    // cxt.clearRect(0, 0, 900, 900)//清空画布
+    drowTable()//画棋盘
+    gaming = true
+    this.color = 'black'//初始化颜色
+    this.time = 30//初始化时间
+    // document.getElementById('tableOne').onclick=clickCanvas(event);
+    // document.getElementById('tableOne').onmousemove=mouseMove(event);
+    //初始化data(棋盘数据)
+    this.data = {
+      0: { 0: 0 },
+      1: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      2: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      3: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      4: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      5: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      6: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      7: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      8: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      9: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      10: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      11: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      12: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      13: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      14: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+      15: {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+        14: 0,
+        15: 0,
+      },
+    }
+  }
+  data = {}//棋盘数据变量
+  var color = 'black'//颜色变量
+  var now = [0, 0]//全局变量，记录上一次鼠标经过的位置(不在初始化中进行修改)
+  var gaming = true//全局变量，游戏是否在进行中
+  var time = 30//剩余时间变量(初始化中初始化为30，画一次棋子后变为30)
+  init()//初始化函数
+</script>
+
+</html>
