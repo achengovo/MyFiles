@@ -13,22 +13,21 @@ import static com.achengovo.myfiles.utils.VerCode.getRandomVerCode;
 @Service
 public class UserServiceImpl implements UserService {
     Logger log = org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class);
-//    @Autowired
-//    MybatisUtils mybatisUtils;
-////    MybatisUtils mybatisUtils=new MybatisUtils();
-//    UserMapper userMapper = mybatisUtils.getMapper(UserMapper.class);
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    RedisClient redisUtils;
     /**
      * 用户登录
      * @param user
      * @return
      */
     public String login(User user){
+        System.out.println(user);
         User resultUser = userMapper.login(user);
         if(resultUser!=null){
             String userToken = resultUser.getUserId()+"#"+java.util.UUID.randomUUID();
-            RedisUtils.setObject(userToken,resultUser,60*60*24*7);
+            redisUtils.set(userToken,resultUser,60*60*24*7);
             return userToken;
         }
         return "fail";
@@ -40,7 +39,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     public boolean loginOut(String userToken) {
-        if(RedisUtils.del(userToken)){
+        if(redisUtils.del(userToken)){
             return true;
         }
         return false;
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
      */
     public String register(User user){
         //检查验证码是否正确
-        if(!user.getVarCode().equals(RedisUtils.get(user.getUserEmail()+"register"))){
+        if(!user.getVarCode().equals(redisUtils.get(user.getUserEmail()+"register"))){
             return "验证码错误";
         }
         //检查用户名是否存在
@@ -63,7 +62,7 @@ public class UserServiceImpl implements UserService {
         //注册用户
         if(userMapper.register(user)==1){
             //注册成功后从redis中删除验证码
-            RedisUtils.del(user.getUserEmail()+"register");
+            redisUtils.del(user.getUserEmail()+"register");
             return "注册成功";
         }
         return "注册失败";
@@ -94,7 +93,7 @@ public class UserServiceImpl implements UserService {
             }
         }
         try{
-            RedisUtils.set(email+type, verCode, 60 * 5);
+            redisUtils.set(email+type, verCode, 60 * 5);
             SendMail.sendNetMail(email, content, "MyFiles验证码");
         }catch (Exception e){
             e.printStackTrace();
@@ -133,10 +132,10 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         //保证修改的是自己的头像
-        user.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        user.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(userMapper.uploadAvatar(user)>0){
             //更新redis中的用户信息
-            RedisUtils.setObject(user.getUserToken(),userMapper.getUserInfo(user),60*60*24*7);
+            redisUtils.set(user.getUserToken(),userMapper.getUserInfo(user),60*60*24*7);
             return true;
         }
         return false;
@@ -152,7 +151,17 @@ public class UserServiceImpl implements UserService {
         if(userToken==null){
             return null;
         }
-        User resultUser= (User) RedisUtils.getObject(userToken);
+        User resultUser= (User) redisUtils.get(userToken);
+        return resultUser;
+    }
+
+    public User getUserInfoFromRedis(String userToken) {
+        if(userToken==null){
+            return null;
+        }
+        System.out.println(userToken);
+        User resultUser= (User) redisUtils.get(userToken);
+        System.out.println(resultUser);
         return resultUser;
     }
 
@@ -170,7 +179,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     public String changeUser(User user){
-        User nowUser = (User) RedisUtils.getObject(user.getUserToken());
+        User nowUser = (User) redisUtils.get(user.getUserToken());
         //保证要修改的用户是登录用户
         user.setUserId(nowUser.getUserId());
         //检查用户名是否修改
@@ -187,15 +196,15 @@ public class UserServiceImpl implements UserService {
             if(varCode==null){
                 return "邮箱验证码不能为空";
             }
-            if(!user.getVarCode().equals(RedisUtils.get(user.getUserEmail()+"changeEmail"))){
+            if(!user.getVarCode().equals(redisUtils.get(user.getUserEmail()+"changeEmail"))){
                 return "邮箱验证码错误";
             }
             //从redis中删除验证码
-            RedisUtils.del(user.getUserEmail()+"changeEmail");
+            redisUtils.del(user.getUserEmail()+"changeEmail");
         }
         //修改用户信息并更新redis
         if(userMapper.changeUser(user)>0){
-            RedisUtils.setObject(user.getUserToken(),userMapper.getUserInfo(user));
+            redisUtils.set(user.getUserToken(),userMapper.getUserInfo(user));
             return "success";
         }
         return "用户信息修改失败";
@@ -220,7 +229,7 @@ public class UserServiceImpl implements UserService {
      */
     public boolean changePassByPass(User user, String newPass){
         //保证要修改的用户是登录用户
-        user.setUserId(((User)RedisUtils.getObject(user.getUserToken())).getUserId());
+        user.setUserId(((User)redisUtils.get(user.getUserToken())).getUserId());
         newPass= Md5Util.remd5(newPass);
         //修改密码
         if(userMapper.changePassByPass(user.getUserId(),user.getUserPass(),newPass)>0) {

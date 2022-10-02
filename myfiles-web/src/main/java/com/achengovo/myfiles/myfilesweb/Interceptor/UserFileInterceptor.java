@@ -1,8 +1,10 @@
 package com.achengovo.myfiles.myfilesweb.Interceptor;
 
+import com.achengovo.lightning.client.Reference;
+import com.achengovo.lightning.client.loadbalance.WeigthRandomLoadbalanceImpl;
 import com.achengovo.myfiles.entity.User;
+import com.achengovo.myfiles.service.UserService;
 import com.achengovo.myfiles.utils.CookiesUtils;
-import com.achengovo.myfiles.utils.RedisUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -20,8 +22,10 @@ public class UserFileInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        Reference reference = new Reference("127.0.0.1:8848", UserService.class.getName(), "DEFAULT_GROUP");
+        UserService userService = (UserService) reference.createProxy(UserService.class, new WeigthRandomLoadbalanceImpl());
         String userToken= CookiesUtils.getCookie(request,"userToken");
-        User user= (User) RedisUtils.getObject(userToken);
+        User user= userService.getUserInfoFromRedis(userToken);
         if(user==null){
             return false;
         }

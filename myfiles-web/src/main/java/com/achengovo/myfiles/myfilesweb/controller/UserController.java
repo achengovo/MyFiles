@@ -38,6 +38,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/login")
     public String login(@RequestBody User user, HttpServletResponse response) {
+        System.out.println(user);
         String userToken = userService.login(user);
         if(!"fail".equals(userToken)){
             CookiesUtils.setCookie(response,"userToken",userToken,60*60*24*7);

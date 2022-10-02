@@ -4,21 +4,18 @@ import com.achengovo.myfiles.entity.User;
 import com.achengovo.myfiles.entity.UserFile;
 import com.achengovo.myfiles.mapper.FileMapper;
 import com.achengovo.myfiles.service.FileService;
-import com.achengovo.myfiles.utils.RedisUtils;
+import com.achengovo.myfiles.utils.RedisClient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 @Service
 public class FileServiceImpl implements FileService {
     Logger log = org.slf4j.LoggerFactory.getLogger(FileServiceImpl.class);
-//    @Autowired
-//    MybatisUtils mybatisUtils;
-//    MybatisUtils mybatisUtils=new MybatisUtils();
-//    FileMapper fileMapper = mybatisUtils.getMapper(FileMapper.class);
     @Autowired
     FileMapper fileMapper;
+    @Autowired
+    RedisClient redisUtils;
     /**
      * 通过dir查询文件夹列表
      * @param userFile
@@ -31,7 +28,7 @@ public class FileServiceImpl implements FileService {
             return null;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         return fileMapper.getFileByDir(userFile);
     }
     /**
@@ -46,7 +43,7 @@ public class FileServiceImpl implements FileService {
             return null;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         return fileMapper.getFileByUserFileId(userFile);
     }
 
@@ -62,7 +59,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(fileMapper.delFileById(userFile)>0){
             return true;
         }
@@ -81,7 +78,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(fileMapper.reName(userFile)>0){
             return true;
         }
@@ -99,7 +96,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
         //保证移动的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(fileMapper.moveFile(userFile)>0){
             return true;
         }
@@ -117,7 +114,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(fileMapper.insertToUserFiles(userFile)>0){
             return true;
         }
@@ -135,7 +132,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
         //保证查询的是当前用户的文件
-        userFile.setUserId(((User) RedisUtils.getObject(userToken)).getUserId());
+        userFile.setUserId(((User) redisUtils.get(userToken)).getUserId());
         if(fileMapper.newDir(userFile)>0){
             return true;
         }

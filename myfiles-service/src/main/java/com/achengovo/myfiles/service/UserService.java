@@ -56,6 +56,12 @@ public interface UserService {
      */
     User getUserInfoInRedis(User user);
     /**
+     * 从Redis（Session）获取用户信息
+     * @param userToken
+     * @return
+     */
+    User getUserInfoFromRedis(String userToken);
+    /**
      * 从数据库获取用户信息
      * @param user
      * @return

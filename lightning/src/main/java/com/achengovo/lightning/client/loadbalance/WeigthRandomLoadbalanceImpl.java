@@ -27,7 +27,6 @@ public class WeigthRandomLoadbalanceImpl implements LoadBalance {
                     return client;
                 }
             }
-
         }
         return null;
     }
