@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
      */
     public String register(User user){
         //检查验证码是否正确
-        if(!user.getVarCode().equals(redisUtils.get(user.getUserEmail()+"register"))){
+        if(!user.getVarCode().equalsIgnoreCase((String) redisUtils.get(user.getUserEmail()+"register"))){
             return "验证码错误";
         }
         //检查用户名是否存在
@@ -196,7 +196,7 @@ public class UserServiceImpl implements UserService {
             if(varCode==null){
                 return "邮箱验证码不能为空";
             }
-            if(!user.getVarCode().equals(redisUtils.get(user.getUserEmail()+"changeEmail"))){
+            if(!user.getVarCode().equalsIgnoreCase((String) redisUtils.get(user.getUserEmail()+"changeEmail"))){
                 return "邮箱验证码错误";
             }
             //从redis中删除验证码
